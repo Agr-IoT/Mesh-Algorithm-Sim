@@ -97,7 +97,7 @@ end
                       
 graphics_toolkit("gnuplot")             
 
-while operating_nodes>0
+while operating_nodes>4
         
     % Displays Current Round %     
     rnd     
@@ -139,7 +139,6 @@ while operating_nodes>0
                     CL(CLheads).y=SN(i).y; % Y-axis coordinates of elected cluster head
                     CL(CLheads).id=i; % Assigns the node ID of the newly elected cluster head to an array
                     end
-        
             end
         end
         
