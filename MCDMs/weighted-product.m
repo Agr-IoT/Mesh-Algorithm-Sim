@@ -99,7 +99,7 @@ end
                       
 graphics_toolkit("gnuplot") % Setup the plotting library for graphs (used in GNU Octave)             
 
-while operating_nodes>0
+while operating_nodes>4
         
     % Displays Current Round %     
     rnd     
@@ -158,12 +158,18 @@ while operating_nodes>0
         
         RANKED=sortrows(SCORE,1);
 
-        for assignRanksCounter=1:n
-            % if (SN(assignRanksCounter).score == RANKED(assignRanksCounter,1))
-            %     SN(assignRanksCounter).rank = RANKED(assignRanksCounter,2);
-            % end
-        endfor
-        
+        finalRank=100;
+        for assignRanksCounter1=1:n
+            for assignRanksCounter2=1:n
+                if (RANKED(assignRanksCounter1,1) == SN(assignRanksCounter2).score)
+                    SN(assignRanksCounter2).rank = finalRank;
+                    finalRank=finalRank-1;
+                    break
+                else
+                    continue
+                end    
+            end
+        end   
     end
     
         
@@ -177,7 +183,21 @@ while operating_nodes>0
             end
             SN(i).dts=sqrt((sinkx-SN(i).x)^2 + (sinky-SN(i).y)^2); % calculates the distance between the sink and the cluster head
             if (SN(i).E>0) && (SN(i).rleft==0)
-                generate=rand;	
+                generate=rand;
+                if (rnd>0)
+                    if (SN(i).rank<6)
+                        SN(i).role=1;	% assigns the node role of acluster head
+                        SN(i).rn=rnd;	% Assigns the round that the cluster head was elected to the data table
+                        SN(i).tel=SN(i).tel + 1;   
+                        SN(i).rleft=1/p-tleft;    % rounds for which the node will be unable to become a CH
+                        
+                        CLheads=CLheads+1;	% sum of cluster heads that have been elected 
+                        SN(i).cluster=CLheads; % cluster of which the node got elected to be cluster head
+                        CL(CLheads).x=SN(i).x; % X-axis coordinates of elected cluster head
+                        CL(CLheads).y=SN(i).y; % Y-axis coordinates of elected cluster head
+                        CL(CLheads).id=i; % Assigns the node ID of the newly elected cluster head to an array  
+                    end
+                else    
                     if generate< t
                         SN(i).role=1;	% assigns the node role of acluster head
                         SN(i).rn=rnd;	% Assigns the round that the cluster head was elected to the data table
@@ -189,8 +209,8 @@ while operating_nodes>0
                         CL(CLheads).x=SN(i).x; % X-axis coordinates of elected cluster head
                         CL(CLheads).y=SN(i).y; % Y-axis coordinates of elected cluster head
                         CL(CLheads).id=i; % Assigns the node ID of the newly elected cluster head to an array
-                    end
-        
+                    end    
+                end        
             end
         end
         
@@ -260,7 +280,6 @@ while operating_nodes>0
     
     
     % Energy Dissipation for cluster head nodes %
-   
    for i=1:n
      if (SN(i).cond==1)  && (SN(i).role==1)
          if SN(i).E>0
@@ -284,13 +303,14 @@ while operating_nodes>0
         temp_val=1;
         flag1stdead=rnd
     end
+    
     % Display Number of Cluster Heads of this round %
     CLheads;
    
     
     transmissions=transmissions+1;
     if CLheads==0
-    transmissions=transmissions-1;
+      transmissions=transmissions-1;
     end
     
  
@@ -302,7 +322,7 @@ while operating_nodes>0
     
 
     if energy>0
-    nrg(transmissions)=energy;
+      nrg(transmissions)=energy;
     end
     
 
@@ -311,7 +331,7 @@ end
 
 sum=0;
 for i=1:flag1stdead
-    sum=nrg(i) + sum;
+    %sum=nrg(i) + sum;
 end
 
 temp1=sum/flag1stdead;
@@ -325,7 +345,7 @@ end
     % Plotting Simulation Results "Operating Nodes per Round" %
     figure(2)
     plot(1:rnd,op(1:rnd),'-r','Linewidth',2);
-    title ({'LEACH'; 'Operating Nodes per Round';})
+    title ({'LEACH - Ranked'; 'Operating Nodes per Round';})
     xlabel 'Rounds';
     ylabel 'Operational Nodes';
     hold on;
